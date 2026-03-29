@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: wallet-app
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: wallet-app
+  template:
+    metadata:
+      labels:
+        app: wallet-app
+    spec:
+      containers:
+      - name: wallet-app
+        image: yourdockerhub/digital-wallet:latest
+        ports:
+        - containerPort: 8080
+        env:
+        - name: SPRING_DATASOURCE_URL
+          valueFrom:
+            secretKeyRef:
+              name: db-secret
+              key: url
+        readinessProbe:
+          httpGet:
+            path: /actuator/health
+            port: 8080
+          initialDelaySeconds: 30
+        livenessProbe:
+          httpGet:
+            path: /actuator/health
+            port: 8080
+          initialDelaySeconds: 60
